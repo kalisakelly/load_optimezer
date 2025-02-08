@@ -1,52 +1,62 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
-export class UserService {
-  constructor(
-    @InjectRepository(User) private readonly userRepository:Repository<User>
-  ) {}
-  async create(UserData: Partial<User>): Promise<User> {
-    
-    const user = await this.userRepository.findOneBy({ email: UserData.email })
-    if (user) {
-      
-      throw 'User already exists'
-    }
+export class UsersService {
 
-    return this.userRepository.save(UserData)
-  }
-    
-  async validateUser(email: string, password: string): Promise<any> {
-    
-    const user = await this.userRepository.findOneBy({ email: email });
-    if (user && user.password === password) {
-      const { password, ...result } = user;
-      return result;
-    }
-    return null;
-  }
-
-    
+  constructor(@InjectRepository(User) private userrepository:Repository<User>){}
   
+  async getByEmail(email:string){
+    const user = await this.userrepository.findOneBy({ email })
+    if(user){
+      return user;
+    }
+    throw new HttpException('User with this email does not exist', HttpStatus.NOT_FOUND);
+  }
+
+  async create(createUserDto:CreateUserDto):Promise<User>{
+
+    
+    const user = new User();
+    user.email=createUserDto.email;
+    user.password=createUserDto.password;
+
+    return this.userrepository.save(user);
+
+  }
 
   findAll() {
-    return this.userRepository.find();
+    return this.userrepository.find();
   }
 
-  findOne(email: string) {
-    return  this.userRepository.findOneBy({ email: email });
+    findOne(userid: number) {
+    return this.userrepository.findOneBy({userid})
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return this.userRepository.update(id,updateUserDto)
+  async update(userId: number, user: Partial<User>): Promise<void> {
+    await this.userrepository.update(userId, user);
   }
 
+  async updaterole(userid:number, updateUserDto:UpdateUserDto) : Promise<User>{
+
+    const user = await this.findOne(userid);
+    Object.assign(user, updateUserDto)
+    return this.userrepository.save(user)
+  }
   remove(id: number) {
-    return this.userRepository.delete(id);
+    return `This action removes a #${id} user`;
   }
+
+  async findByVerificationToken(token: string): Promise<User> {
+    return this.userrepository.findOneBy({ emailVerificationToken: token });
+  }
+
+  async findByPasswordResetToken(token: string): Promise<User> {
+    return this.userrepository.findOneBy({ passwordResetToken: token });
+  }
+
 }

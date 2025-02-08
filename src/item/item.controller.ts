@@ -2,16 +2,27 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { ItemService } from './item.service';
 import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
-import { Item } from './entities/item.entity';
+import { ApiTags, ApiOperation, ApiParam, ApiBody, ApiResponse } from '@nestjs/swagger';
 
 @Controller('item')
+@ApiTags('Item')
 export class ItemController {
-  constructor(private readonly itemService: ItemService) {}
+  constructor(private  itemService: ItemService) {}
 
   @Post()
-  create(@Body() ItemData: Partial<Item>) {
-    return this.itemService.create(ItemData);
+  @ApiOperation({ summary: 'Create a new item' })
+  @ApiBody({ schema:{
+    type:'object',
+    properties:{
+      name:{type:'string'}
+    },
+    required:['name']
+  } })
+  @ApiResponse({ status: 200, description: 'Item created' })
+  create(@Body() createItemDto: CreateItemDto) {
+    return this.itemService.create(createItemDto);
   }
+  
 
   @Get()
   findAll() {

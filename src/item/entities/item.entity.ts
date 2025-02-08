@@ -1,24 +1,32 @@
-import { Stock } from "src/stock/entities/stock.entity";
-import { Vehicle } from "src/vehicle/entities/vehicle.entity";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Packaging } from 'src/packaging/entities/packaging.entity';
+import { StockEntry } from 'src/stock_entry/entities/stock_entry.entity';
+import { Vehicle } from 'src/vehicle/entities/vehicle.entity';
+import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
 export class Item {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  name: string
-  
-  @Column()
-  quantity: number
+  @Column({unique:true})
+  name: string;
 
-  @OneToMany(() => Stock, (stock) => stock.items)
-  stored: Stock
-  
-  @OneToMany(() => Vehicle, (vehicle) => vehicle.items)
-  vehicle: Vehicle
+  @Column({ default: true })
+  available: boolean;
 
-  @Column({default: true})
-  available:boolean
+ @ManyToOne(() => StockEntry, (stockentry) => stockentry.item)
+ stockEntries: StockEntry;
+
+ @OneToMany(() => Vehicle, (vehicle) =>vehicle.items)
+ vehicle: Vehicle;
+
+ @OneToMany(() => Packaging, (packaging) => packaging.item)
+ packagings: Packaging[];
+
+ @CreateDateColumn()
+  createdate: Date;
+
+  @UpdateDateColumn()
+  updatedate: Date;
+  
 }

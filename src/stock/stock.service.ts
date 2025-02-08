@@ -5,16 +5,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Stock } from './entities/stock.entity';
 import { Repository } from 'typeorm';
 import { Item } from 'src/item/entities/item.entity';
+import { StockEntry } from 'src/stock_entry/entities/stock_entry.entity';
 
 @Injectable()
 export class StockService {
 
   constructor(
-
-    @InjectRepository(Stock) private readonly stockRepository: Repository<Stock>,
+    @InjectRepository(StockEntry) private stockEntryRepository: Repository<StockEntry>,
+    @InjectRepository(Stock) private stockRepository: Repository<Stock>,
     @InjectRepository(Item) private itemRepository: Repository<Item>,
-
-  ) { }
+  ) {}
   async create(StockData: Partial<Stock>): Promise<Stock> {
     
     const new_stock = await this.stockRepository.save(StockData);
@@ -58,61 +58,77 @@ export class StockService {
     }
   }
 
-  async loadItem(stockId: number, itemId: number, quantity: number): Promise<Stock> {
+
+  async addStockEntry(stockId: number, itemId: number, quantity: number): Promise<any> {
     const stock = await this.stockRepository.findOne({
       where: { id: stockId },
-      relations: ['items'],
+      // relations: ['stockEntries', 'stockEntries.item'],
     });
-    if (!stock) throw new NotFoundException('Stock not found');
+
+    if (!stock) {
+      throw new Error('Stock not found');
+    }
+
+    if (stock.available_stock + quantity > stock.capacity) {
+      throw new Error('Exceeds stock capacity');
+    }
 
     const item = await this.itemRepository.findOne({ where: { id: itemId } });
-    if (!item) throw new NotFoundException('Item not found');
-
-    if (stock.capacity < quantity) {
-      throw new Error('Not enough capacity in the stock');
+    if (!item) {
+      throw new Error('Item not found');
     }
 
-    item.quantity += quantity;
-    await this.itemRepository.save(item);
+    const stockEntry = new StockEntry();
+    stockEntry.item = item;
+    stockEntry.stock = stock;
+    stockEntry.quantity = quantity;
 
-    if (!stock.items.includes(item)) {
-      stock.items.push(item);
-    }
+    await this.stockEntryRepository.save(stockEntry);
 
-    stock.capacity -= quantity;
-    return this.stockRepository.save(stock);
+    // Update available_stock in the stock
+    stock.available_stock = (stock.available_stock || 0) + quantity;
+    await this.stockRepository.save(stock);
+
+    return { message: 'Stock entry added successfully' };
   }
 
-  async removeItem(stockId: number, itemId: number, quantity: number): Promise<Stock> {
+  async getStockDetails(stockId: number): Promise<any> {
     const stock = await this.stockRepository.findOne({
       where: { id: stockId },
-      relations: ['items'],
+      relations: ['stockEntries', 'stockEntries.item'],
     });
-    if (!stock) throw new NotFoundException('Stock not found');
 
-    const item = await this.itemRepository.findOne({ where: { id: itemId } });
-    if (!item) throw new NotFoundException('Item not found');
-
-    if (item.quantity < quantity) {
-      throw new Error('Not enough items in stock');
+    if (!stock) {
+      throw new Error('Stock not found');
     }
 
-    item.quantity -= quantity;
-    await this.itemRepository.save(item);
+    const itemsInStock = stock.stockEntries.map((entry) => ({
+      itemId: entry.item.id,
+      itemName: entry.item.name,
+      quantity: entry.quantity,
+    }));
 
-    stock.capacity += quantity;
-
-    if (item.quantity === 0) {
-      stock.items = stock.items.filter((stockItem) => stockItem.id !== itemId);
-    }
-
-    return this.stockRepository.save(stock);
+    return {
+      stockName: stock.name,
+      capacity: stock.capacity,
+      availableStock: stock.available_stock,
+      items: itemsInStock,
+    };
   }
+  async removefromstock(stockId: number, itemId: number, quantity: number): Promise<any> {
 
-  async getStockWithQuantities(stockId: number): Promise<Stock> {
-    return this.stockRepository.findOne({
+    const stock = await this.stockRepository.findOne({
       where: { id: stockId },
-      relations: ['items'],
     });
+    if (!stock) {
+      throw new Error('Stock not found');
+    }
+    const item = await this.itemRepository.findOne({ where: { id: itemId } });
+
+    
+  
   }
+
 }
+
+

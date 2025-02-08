@@ -1,13 +1,13 @@
 import { Stock } from 'src/stock/entities/stock.entity';
 import { Vehicle } from 'src/vehicle/entities/vehicle.entity';
-import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
-  id: number;
+  userid: number;
 
-  @Column()
+  @Column({nullable:true} )
   name: string;
   
   @Column({ unique: true })
@@ -19,7 +19,7 @@ export class User {
   @Column()
   password: string;
 
-  @Column()
+  @Column({ default: 'user' }) 
   role: string;
 
   @OneToOne(() => Vehicle, (vehicle) => vehicle.driver)
@@ -27,6 +27,25 @@ export class User {
 
   @OneToOne(() => Stock, (stock) => stock.managed_by)
   stock:Stock
+
+  @Column({ nullable: true })
+  emailVerificationToken: string;
+
+  
+  @Column({ nullable: true })
+  passwordResetToken: string;
+
+  @Column({ default: false })
+  isEmailVerified: boolean;
+
+  @Column({ nullable: true })
+  passwordResetExpires: Date;
+
+   @CreateDateColumn()
+    createdate: Date;
+
+    @UpdateDateColumn()
+    updatedate: Date;
 
   
 }

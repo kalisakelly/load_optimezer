@@ -1,6 +1,8 @@
-import { Item } from "src/item/entities/item.entity";
-import { User } from "src/user/entities/user.entity";
-import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Packaging } from 'src/packaging/entities/packaging.entity';
+import { StockEntry } from 'src/stock_entry/entities/stock_entry.entity';
+import { User } from 'src/user/entities/user.entity';
+import { Column, Entity, PrimaryGeneratedColumn, OneToMany, JoinColumn, OneToOne, UpdateDateColumn, CreateDateColumn } from 'typeorm';
+
 
 @Entity()
 export class Stock {
@@ -14,13 +16,25 @@ export class Stock {
   details: string;
 
   @Column()
-  capacity: number;
+  capacity: number; // Maximum capacity of the stock
 
-  @OneToMany(() => Item, (item) => item.stored)
-  items: Item[];
+  @Column({ nullable: true })
+  available_stock: number; // Current available stock (to be calculated)
+
+  @OneToMany(() => StockEntry, (stockEntry) => stockEntry.stock, { cascade: true })
+  stockEntries: StockEntry[];
+  
 
   @OneToOne(() => User, (user) => user.stock)
   @JoinColumn()
   managed_by: User;
-}
 
+  @OneToMany(()=>Packaging,(packagings) => packagings.stock)
+  packagings: Packaging[];
+
+  @CreateDateColumn()
+  createdate: Date;
+
+  @UpdateDateColumn()
+  updatedate: Date;
+}

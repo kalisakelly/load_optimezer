@@ -1,14 +1,28 @@
-import { IsNotEmpty } from "class-validator";
+import { IsNotEmpty, IsString, IsNumber } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateVehicleDto {
+  @ApiProperty({
+    description: 'The name of the vehicle',
+    example: 'Truck A',
+  })
+  @IsNotEmpty()
+  @IsString()
+  name: string;
 
-    @IsNotEmpty()
-    name: string;
-  
-    @IsNotEmpty()
-    description: string;
-  
-    @IsNotEmpty()
-    capacity: number;
-  
+  @ApiProperty({
+    description: 'A description of the vehicle',
+    example: 'Large truck for transporting goods',
+  })
+  @IsNotEmpty()
+  @IsString()
+  description: string;
+
+  @ApiProperty({
+    description: 'The maximum capacity of the vehicle',
+    example: 5000,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  capacity: number;
 }

@@ -13,17 +13,22 @@ import { Vehicle } from './vehicle/entities/vehicle.entity';
 import { Notification } from './notification/entities/notification.entity';
 import { Stock } from './stock/entities/stock.entity';
 import { Item } from './item/entities/item.entity';
+import { StockEntryModule } from './stock_entry/stock_entry.module';
+import { StockEntry } from './stock_entry/entities/stock_entry.entity';
+import { PackagingModule } from './packaging/packaging.module';
+import { Packaging } from './packaging/entities/packaging.entity';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: "localhost",
-      port: 5433,
+      port: 5432,
       username: "postgres",
       password: "1234",
       database: "loadfleat",
-      entities: [User, Vehicle, Notification, Stock, Item],
+      entities: [User, Vehicle, Notification, Stock, Item, StockEntry,Packaging],
       synchronize: true,
     }),
     UserModule,
@@ -32,6 +37,9 @@ import { Item } from './item/entities/item.entity';
     VehicleModule,
     NotificationModule,
     ItemModule,
+    StockEntryModule,
+    PackagingModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [AppService],
