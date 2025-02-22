@@ -9,6 +9,7 @@ async function bootstrap() {
     .setTitle('Loadfleat')
     .setDescription('Load optimization system')
     .setVersion('1.0')
+    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'jwt') // Define Bearer token auth
     .addTag('loads')
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);

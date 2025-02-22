@@ -1,8 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBody, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBody, ApiResponse, ApiParam, ApiSecurity } from '@nestjs/swagger';
 import { VehicleService } from './vehicle.service';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
+import { Roles } from 'src/auth/decorator/roles.decorator';
+import { AuthenticationGuard } from 'src/guards/authentication.guard';
+import { AuthorizationGuard } from 'src/guards/authorization.guard';
 
 @ApiTags('vehicles') // Group all vehicle-related endpoints under "vehicles" in Swagger
 @Controller('vehicle')
@@ -12,6 +15,9 @@ export class VehicleController {
   @ApiOperation({ summary: 'Create a new vehicle' })
   @ApiBody({ type: CreateVehicleDto }) // Define the request body schema
   @ApiResponse({ status: 201, description: 'Vehicle created successfully.' })
+  @UseGuards(AuthenticationGuard, AuthorizationGuard)
+  @Roles('logistics', 'admin')
+  @ApiSecurity('jwt')
   @Post()
   create(@Body() createVehicleDto: CreateVehicleDto) {
     return this.vehicleService.create(createVehicleDto);

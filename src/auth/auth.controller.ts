@@ -45,35 +45,38 @@ export class AuthController {
         role,
       };
     }
-  @UseGuards(AuthenticationGuard)
-  @Get('user')
-  async user(@Req() request: Request) {
-    try {
-      const cookie = request.cookies['jwt'];
-
-      if (!cookie) {
-        throw new UnauthorizedException('JWT cookie is missing');
+    @UseGuards(AuthenticationGuard)
+    @Get('user')
+    async user(@Req() request: Request) {
+      try {
+        let token = request.cookies['jwt']; // Check for token in cookie first
+        if (!token) {
+          const authHeader = request.headers['authorization'];
+          if (authHeader && authHeader.startsWith('Bearer ')) {
+            token = authHeader.split(' ')[1]; // Extract token from Authorization header
+          }
+        }
+    
+        if (!token) {
+          throw new UnauthorizedException('JWT token is missing');
+        }
+    
+        const data = await this.jwtService.verifyAsync(token); // Verify the token
+        if (!data) {
+          throw new UnauthorizedException('Invalid JWT token');
+        }
+    
+        const user = await this.authService.findOne({ id: data.userid }); // Fetch user
+        if (!user) {
+          throw new UnauthorizedException('User not found');
+        }
+    
+        const { password, ...result } = user; // Exclude sensitive fields
+        return result;
+      } catch (e) {
+        throw new UnauthorizedException('Unauthorized access');
       }
-
-      const data = await this.jwtService.verifyAsync(cookie);
-
-      if (!data) {
-        throw new UnauthorizedException('Invalid JWT token');
-      }
-
-      const user = await this.authService.findOne({ id: data.userid });
-
-      if (!user) {
-        throw new UnauthorizedException('User not found');
-      }
-
-      const { password, ...result } = user;
-
-      return result;
-    } catch (e) {
-      throw new UnauthorizedException('Unauthorized access');
     }
-  }
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   async logout(@Res({ passthrough: true }) response: Response, @Req() request: Request) {

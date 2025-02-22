@@ -71,6 +71,12 @@ export class PackagingService {
     return vehicle.packagings.reduce((total, packaging) => total + packaging.quantity, 0);
   }
 
+  // async getAllVehiclesWithItems() {
+  //   return this.vehicleRepository.find({
+  //     relations: ["items", "packagings", "packagings.stock", "packagings.item"],
+  //   });
+  // }
+
   async getVehicleWithItems(vehicleId: number): Promise<Vehicle> {
     // Fetch the vehicle with its related items and packagings
     const vehicle = await this.vehicleRepository.findOne({

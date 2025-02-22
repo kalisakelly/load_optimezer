@@ -6,6 +6,7 @@ import { UsersService } from './user.service';
 import { AuthenticationGuard } from 'src/guards/authentication.guard';
 import { AuthorizationGuard } from 'src/guards/authorization.guard';
 import { Roles } from 'src/auth/decorator/roles.decorator';
+import { ApiSecurity } from '@nestjs/swagger';
 
 
 @Controller('users')
@@ -14,6 +15,7 @@ export class UsersController {
 
   @UseGuards(AuthenticationGuard,AuthorizationGuard)
   @Roles('admin')
+  @ApiSecurity('jwt')
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
@@ -26,6 +28,7 @@ export class UsersController {
 
   @UseGuards(AuthenticationGuard,AuthorizationGuard)
   @Roles('admin')
+  @ApiSecurity('jwt')
   @Get()
   findAll() {
     return this.usersService.findAll();
@@ -49,6 +52,7 @@ export class UsersController {
   @UseGuards(AuthenticationGuard,AuthorizationGuard)
   @Roles('admin')
   @Patch(':userid/role')
+  @ApiSecurity('jwt')
   async updaterole(@Param('userid') userid: number, @Body() updateUserDto: UpdateUserDto): Promise<User> {
     return this.usersService.updaterole(userid, updateUserDto);
   }
