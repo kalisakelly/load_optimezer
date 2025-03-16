@@ -29,8 +29,8 @@ export class Stock {
   @JoinColumn()
   managed_by: User;
 
-  @OneToMany(()=>Packaging,(packagings) => packagings.stock)
-  packagings: Packaging[];
+  // @OneToMany(()=>Packaging,(packagings) => packagings.stock)
+  // packagings: Packaging[];
 
   @CreateDateColumn()
   createdate: Date;

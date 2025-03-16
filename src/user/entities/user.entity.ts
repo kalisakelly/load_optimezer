@@ -1,6 +1,7 @@
+import { ProductPackage } from 'src/product-package/entities/product-package.entity';
 import { Stock } from 'src/stock/entities/stock.entity';
 import { Vehicle } from 'src/vehicle/entities/vehicle.entity';
-import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, ManyToMany, ManyToOne } from 'typeorm';
 
 @Entity()
 export class User {
@@ -41,11 +42,14 @@ export class User {
   @Column({ nullable: true })
   passwordResetExpires: Date;
 
-   @CreateDateColumn()
-    createdate: Date;
+  @ManyToOne(()=>ProductPackage,(packages)=>packages.owner)
+  packages: ProductPackage
 
-    @UpdateDateColumn()
-    updatedate: Date;
+  @CreateDateColumn()
+  createdate: Date;
+
+  @UpdateDateColumn()
+  updatedate: Date;
 
   
 }

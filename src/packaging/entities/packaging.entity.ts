@@ -1,8 +1,14 @@
-import { Item } from "src/item/entities/item.entity";
-import { Stock } from "src/stock/entities/stock.entity";
+// src/packaging/entities/packaging.entity.ts
+import { 
+  Entity, 
+  PrimaryGeneratedColumn, 
+  ManyToOne, 
+  Column, 
+  CreateDateColumn, 
+  UpdateDateColumn 
+} from "typeorm";
 import { Vehicle } from "src/vehicle/entities/vehicle.entity";
-import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, UpdateDateColumn, CreateDateColumn } from "typeorm";
-
+import { ProductPackage } from "src/product-package/entities/product-package.entity";
 
 @Entity()
 export class Packaging {
@@ -12,17 +18,14 @@ export class Packaging {
   @ManyToOne(() => Vehicle, (vehicle) => vehicle.packagings)
   vehicle: Vehicle;
 
-  @ManyToOne(() => Item, (item) => item.packagings)
-  item: Item;
-
-  @ManyToOne(() => Stock, (stock) => stock.packagings)
-  stock: Stock; 
+  @ManyToOne(() => ProductPackage, (productPackage) => productPackage.packagings)
+  item: ProductPackage;
 
   @Column()
-  quantity: number; 
+  quantity: number;
 
   @CreateDateColumn()
-    createdate: Date;
+  createdate: Date;
 
   @UpdateDateColumn()
   updatedate: Date;

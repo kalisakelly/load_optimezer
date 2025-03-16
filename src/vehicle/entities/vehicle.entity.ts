@@ -1,7 +1,19 @@
+// src/vehicle/entities/vehicle.entity.ts
+import { 
+  Column, 
+  Entity, 
+  ManyToMany, 
+  JoinTable, 
+  OneToOne, 
+  PrimaryGeneratedColumn, 
+  OneToMany, 
+  CreateDateColumn, 
+  UpdateDateColumn 
+} from "typeorm";
 import { Item } from "src/item/entities/item.entity";
 import { Packaging } from "src/packaging/entities/packaging.entity";
 import { User } from "src/user/entities/user.entity";
-import { Column, Entity, ManyToMany, JoinTable, OneToOne, PrimaryGeneratedColumn, ManyToOne, OneToMany, UpdateDateColumn, CreateDateColumn } from "typeorm";
+import { PackagingRequest } from "src/packaging-request/entities/packaging-request.entity";
 
 @Entity()
 export class Vehicle {
@@ -17,21 +29,28 @@ export class Vehicle {
   @Column()
   capacity: number;
 
+  // Corrected OneToOne with User (driver)
   @OneToOne(() => User, (user) => user.drivers)
   driver: User;
 
-  // Add a many-to-many relationship with Item
-  @ManyToOne(() => Item, (item) => item.vehicle)
+  // Fixed ManyToMany relationship with Item
+  @ManyToMany(() => Item)
   @JoinTable()
   items: Item[];
 
-  @OneToMany(()=>Packaging,(packagings) => packagings.vehicle)
+  @OneToMany(() => Packaging, (packaging) => packaging.vehicle)
   packagings: Packaging[];
 
-  @CreateDateColumn()
-   createdate: Date;
+  // Add inverse side for PackagingRequest relationship
+  @OneToOne(
+    () => PackagingRequest, 
+    (packagingRequest) => packagingRequest.vehicle // Assuming this exists
+  )
+  packagingRequest: PackagingRequest; // Add this field
 
-  @UpdateDateColumn()
-  updatedate: Date;
+  @CreateDateColumn({ name: 'created_at' })
+  created_at: Date;
 
+  @UpdateDateColumn({ name: 'updated_at' })
+  updated_at: Date;
 }

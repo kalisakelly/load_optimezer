@@ -7,9 +7,10 @@ import { Stock } from 'src/stock/entities/stock.entity';
 import { Item } from 'src/item/entities/item.entity';
 import { Vehicle } from 'src/vehicle/entities/vehicle.entity';
 import { JwtService } from '@nestjs/jwt';
+import { ProductPackage } from 'src/product-package/entities/product-package.entity';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([Packaging,Stock,Item,Vehicle])],
+  imports:[TypeOrmModule.forFeature([Packaging,Stock,Item,Vehicle,ProductPackage])],
   controllers: [PackagingController],
   providers: [PackagingService,JwtService],
 })

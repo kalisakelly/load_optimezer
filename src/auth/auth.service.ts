@@ -25,7 +25,7 @@ export class AuthService {
   
   
   async signup(signupDto: SignUpDto): Promise<{ message: string }> {
-    const {  email, password } = signupDto;
+    const { name, email, password, role } = signupDto; // Include `name` and `role`
 
     const hashedPassword = await bcrypt.hash(password, 6);
 
@@ -45,6 +45,8 @@ export class AuthService {
     });
 
     const newUser = this.usersrepository.create({
+      name, 
+      role, 
       email,
       password: hashedPassword,
       emailVerificationToken,

@@ -18,6 +18,10 @@ import { StockEntry } from './stock_entry/entities/stock_entry.entity';
 import { PackagingModule } from './packaging/packaging.module';
 import { Packaging } from './packaging/entities/packaging.entity';
 import { EmailModule } from './email/email.module';
+import { ProductPackageModule } from './product-package/product-package.module';
+import { ProductPackage } from './product-package/entities/product-package.entity';
+import { PackagingRequestModule } from './packaging-request/packaging-request.module';
+import { PackagingRequest } from './packaging-request/entities/packaging-request.entity';
 
 @Module({
   imports: [
@@ -28,7 +32,16 @@ import { EmailModule } from './email/email.module';
       username: "postgres",
       password: "1234",
       database: "loadfleat",
-      entities: [User, Vehicle, Notification, Stock, Item, StockEntry,Packaging],
+      entities: [
+        User, 
+        Vehicle, 
+        Notification,
+        Stock, 
+        Item,
+        StockEntry,
+        Packaging,
+        ProductPackage,
+        PackagingRequest],
       synchronize: true,
     }),
     UserModule,
@@ -40,6 +53,8 @@ import { EmailModule } from './email/email.module';
     StockEntryModule,
     PackagingModule,
     EmailModule,
+    ProductPackageModule,
+    PackagingRequestModule,
   ],
   controllers: [AppController],
   providers: [AppService],

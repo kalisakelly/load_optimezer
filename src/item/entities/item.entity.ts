@@ -5,14 +5,17 @@ import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGenerate
 
 @Entity()
 export class Item {
-  @PrimaryGeneratedColumn()
-  id: number;
+@PrimaryGeneratedColumn()
+id: number;
 
-  @Column({unique:true})
-  name: string;
+@Column({unique:true})
+name: string;
 
-  @Column({ default: true })
-  available: boolean;
+@Column({ default: true })
+available: boolean;
+
+@Column({nullable:true})
+category: string;
 
  @ManyToOne(() => StockEntry, (stockentry) => stockentry.item)
  stockEntries: StockEntry;

@@ -1,11 +1,11 @@
-import { IsNumber, IsPositive } from "class-validator";
+import { IsNotEmpty, IsNumber, IsPositive } from "class-validator";
 
 export class LoadItemDto {
-  @IsNumber()
-  stockId: number;
+ 
 
   @IsNumber()
-  itemId: number;
+  @IsNotEmpty()
+  itemId: number; // Changed from `item: string` to `itemId: number`
 
   @IsNumber()
   @IsPositive()

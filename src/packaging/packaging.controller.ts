@@ -15,19 +15,20 @@ export class PackagingController {
   @ApiOperation({ summary: "Load an item into a vehicle" })
   @ApiBody({ type: LoadItemDto })
   @ApiResponse({ status: 200, description: "Item loaded successfully." })
-  @UseGuards(AuthenticationGuard, AuthorizationGuard)
-  @Roles('logistics', 'admin')
-  @ApiSecurity('jwt')
+  // @UseGuards(AuthenticationGuard, AuthorizationGuard)
+  // @Roles('logistics', 'admin')
+  // @ApiSecurity('jwt')
   @Post("load/:vehicleId")
-  async loadItemToVehicle(@Param("vehicleId") vehicleId: number, @Body() loadItemDto: LoadItemDto) {
+  async loadItemToVehicle(
+    @Param("vehicleId") vehicleId: number, 
+    @Body() loadItemDto: LoadItemDto
+  ) {
     return this.packagingService.loadItemToVehicle(
-      vehicleId,
-      loadItemDto.stockId,
-      loadItemDto.itemId,
-      loadItemDto.quantity
+      vehicleId, 
+      loadItemDto.itemId, 
+      loadItemDto.quantity, 
     );
   }
-
 // @ApiOperation({ summary: "Get all vehicles with their items" })
 // @ApiResponse({ status: 200, description: "List of vehicles with their items." })
 // @Get("vehicle")
