@@ -15,7 +15,7 @@ export class PackagingService {
 
   async loadItemToVehicle(
     vehicleId: number,
-    itemId: number,
+    itemId: string,
     quantity: number
   ): Promise<any> {
     const vehicle = await this.vehicleRepository.findOne({

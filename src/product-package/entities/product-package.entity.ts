@@ -7,16 +7,19 @@ import {
   PrimaryGeneratedColumn, 
   CreateDateColumn, 
   UpdateDateColumn,
-  OneToMany 
+  OneToMany, 
+  PrimaryColumn,
+  BeforeInsert
 } from "typeorm";
 import { User } from "src/user/entities/user.entity";
 import { PackagingRequest } from "src/packaging-request/entities/packaging-request.entity";
 import { Packaging } from "src/packaging/entities/packaging.entity";
+import { v4 as uuidv4 } from 'uuid';
 
 @Entity()
 export class ProductPackage {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryColumn() 
+  id: string;
 
   @Column()
   item_name: string;
@@ -42,6 +45,9 @@ export class ProductPackage {
   @Column({default: false})
   completed: boolean;
 
+  @Column({default:false})
+  delivered: boolean;
+
   @OneToOne(() => PackagingRequest, (packagingRequest) => packagingRequest.product)
   packagingRequest: PackagingRequest;
 
@@ -53,4 +59,12 @@ export class ProductPackage {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updated_at: Date;
+
+  // @BeforeInsert() 
+  // generateUuid() {
+  //   if (!this.id) {
+  //     this.id = uuidv4();
+  //     console.log('Generated UUID:', this.id);
+  //   }
+  // }
 }

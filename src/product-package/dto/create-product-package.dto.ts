@@ -4,6 +4,9 @@ import { IsNotEmpty, IsPositive } from "class-validator";
 export class CreateProductPackageDto {
 
     @IsNotEmpty()
+    id: string;
+
+    @IsNotEmpty()
     item_name: string;
 
     @IsNotEmpty()
