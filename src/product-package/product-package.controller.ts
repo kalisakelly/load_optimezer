@@ -1,16 +1,23 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, HttpCode, HttpStatus, Req, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, HttpCode, HttpStatus, Req, BadRequestException, UnauthorizedException, InternalServerErrorException } from '@nestjs/common';
 import { ProductPackageService } from './product-package.service';
 
 import { CreateProductPackageDto } from './dto/create-product-package.dto';
 import { UpdateProductPackageDto } from './dto/update-product-package.dto';
 import { AuthenticationGuard } from 'src/guards/authentication.guard';
+import { JwtPayload } from 'src/auth/jwt-payload.interface';
+import { ApiSecurity } from '@nestjs/swagger';
+import { AuthorizationGuard } from 'src/guards/authorization.guard';
+import { Roles } from 'src/auth/decorator/roles.decorator';
 
 @Controller('product-package')
+
+
 export class ProductPackageController {
   constructor(private readonly productPackageService: ProductPackageService) {}
 
-  @UseGuards(AuthenticationGuard)
   @Post()
+  @UseGuards(AuthenticationGuard)
+  @ApiSecurity('jwt')
   create(@Body() createProductPackageDto: CreateProductPackageDto , @Req() req: any) {
     
    try{
@@ -36,6 +43,9 @@ export class ProductPackageController {
     return this.productPackageService.findOne(id);
   }
 
+ 
+  
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateProductPackageDto: UpdateProductPackageDto) {
     return this.productPackageService.update(id, updateProductPackageDto);
@@ -52,9 +62,9 @@ export class ProductPackageController {
     @Param('id') id: string,
   ) {
     // const parsedId = parseInt(id, 10);
-    if (id) {
-      throw new Error('Invalid ID format');
-    }
+    // if (id) {
+    //   throw new Error('Invalid ID format');
+    // }
 
     return await this.productPackageService.verifyProductPackage(id);
   }
@@ -65,16 +75,24 @@ export class ProductPackageController {
     @Param('id') id: string,
   ) {
     // const parsedId = parseInt(id, 10);
-    if (id) {
-      throw new Error('Invalid ID format');
-    }
+    // if (id) {
+    //   throw new Error('Invalid ID format');
+    // }
 
     return await this.productPackageService.deliverProductPackage(id);
   }
 
-  @Get('my-packages')
-  async findAllByUser(@Req() req: any) {
-    const user = req.user.id; // Extract the user from the request
-    return await this.productPackageService.findAllByUser(user.id); // Pass the user ID to the service
+  @Get('mypackages/:userId')
+  @UseGuards(AuthenticationGuard)
+  @ApiSecurity('jwt')
+  async getmypackages(@Req() req: any) {
+
+    const user = req.user.id;
+
+    return this.productPackageService.getmypackages(user)
+
+
   }
+
+ 
 }

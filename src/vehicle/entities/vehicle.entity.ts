@@ -8,7 +8,8 @@ import {
   PrimaryGeneratedColumn, 
   OneToMany, 
   CreateDateColumn, 
-  UpdateDateColumn 
+  UpdateDateColumn, 
+  JoinColumn
 } from "typeorm";
 import { Item } from "src/item/entities/item.entity";
 import { Packaging } from "src/packaging/entities/packaging.entity";
@@ -29,8 +30,11 @@ export class Vehicle {
   @Column()
   capacity: number;
 
-  // Corrected OneToOne with User (driver)
+  @Column({nullable:true})
+  type:string;
+
   @OneToOne(() => User, (user) => user.drivers)
+  @JoinColumn()
   driver: User;
 
   // Fixed ManyToMany relationship with Item

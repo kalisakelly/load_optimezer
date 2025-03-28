@@ -1,9 +1,11 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { Repository, RoleSpecification } from 'typeorm';
+import { RoleSelectorDto } from './dto/role-selector.dto';
+import { PaginatedUsersDto } from './dto/paginateduser.dto';
 
 @Injectable()
 export class UsersService {
@@ -57,6 +59,27 @@ export class UsersService {
 
   async findByPasswordResetToken(token: string): Promise<User> {
     return this.userrepository.findOneBy({ passwordResetToken: token });
+  }
+
+  async findUsersByRole(roleSelector: RoleSelectorDto): Promise<PaginatedUsersDto> {
+    const { role, page = 1, limit = 10 } = roleSelector;
+    const skip = (page - 1) * limit;
+
+    const [users, total] = await this.userrepository.findAndCount({
+      where: { role },
+      skip,
+      take: limit,
+    });
+
+    return {
+      data: users,
+      meta: {
+        total,
+        page,
+        limit,
+        last_page: Math.ceil(total / limit),
+      },
+    };
   }
 
 }

@@ -43,9 +43,9 @@ export class PackagingService {
     // Create new Packaging entry
     const packaging = new Packaging();
     packaging.vehicle = vehicle;
-    packaging.item = productPackage; // Assign the ProductPackage instance
+    packaging.item = productPackage; 
     packaging.quantity = quantity;
-  
+    
     await this.packagingRepository.save(packaging);
   
     // Update ProductPackage's quantity and completed status

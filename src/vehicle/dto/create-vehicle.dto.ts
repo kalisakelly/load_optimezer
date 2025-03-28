@@ -25,4 +25,12 @@ export class CreateVehicleDto {
   @IsNotEmpty()
   @IsNumber()
   capacity: number;
+
+  @ApiProperty({
+    description: 'The driver is ID',
+    example: 13,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  driver: number;
 }

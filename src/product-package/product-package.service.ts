@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProductPackageDto } from './dto/create-product-package.dto';
 import { UpdateProductPackageDto } from './dto/update-product-package.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -53,7 +53,9 @@ export class ProductPackageService {
   }
 
   findAll() {
-    return this.ProductpackageRepository.find();
+    return this.ProductpackageRepository.find(
+      {relations: ['owner'], }
+    );
   }
 
   findOne(id: string) {
@@ -117,12 +119,21 @@ async deliverProductPackage(id: string) {
   return packageToDeliver;
 }
 
-async findAllByUser(userId: number): Promise<ProductPackage[]> {
-  return await this.ProductpackageRepository.find({
-    where: { owner: { userid: userId } }, 
-    relations: ['owner'], 
-  });
-}
-}
+// async findAllByUser(userId: number): Promise<ProductPackage[]> {
+//   // Solution 1: Using find with where clause
+//   return this.ProductpackageRepository.find({
+//     where: { owner: { userid: userId } },
+//     relations: ['owner'], // Include owner data if needed
+//   });
 
+// }
+
+async getmypackages(userId: number): Promise<ProductPackage[]> {
+
+  return this.ProductpackageRepository.query(
+    `select * from product_package where "ownerUserid" = $1`,
+    [userId],
+  );
+}
+}
 

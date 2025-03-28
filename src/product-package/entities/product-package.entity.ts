@@ -9,7 +9,8 @@ import {
   UpdateDateColumn,
   OneToMany, 
   PrimaryColumn,
-  BeforeInsert
+  BeforeInsert,
+  JoinColumn
 } from "typeorm";
 import { User } from "src/user/entities/user.entity";
 import { PackagingRequest } from "src/packaging-request/entities/packaging-request.entity";

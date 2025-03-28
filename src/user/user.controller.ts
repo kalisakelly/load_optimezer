@@ -7,6 +7,7 @@ import { AuthenticationGuard } from 'src/guards/authentication.guard';
 import { AuthorizationGuard } from 'src/guards/authorization.guard';
 import { Roles } from 'src/auth/decorator/roles.decorator';
 import { ApiSecurity } from '@nestjs/swagger';
+import { RoleSelectorDto } from './dto/role-selector.dto';
 
 
 @Controller('users')
@@ -26,8 +27,8 @@ export class UsersController {
     return user;
   }
 
-  @UseGuards(AuthenticationGuard,AuthorizationGuard)
-  @Roles('admin')
+  // @UseGuards(AuthenticationGuard,AuthorizationGuard)
+  // @Roles('admin')
   @ApiSecurity('jwt')
   @Get()
   findAll() {
@@ -37,6 +38,11 @@ export class UsersController {
   @Get(':userid')
   findOne(@Param('userid') userid: number) {
     return this.usersService.findOne(userid);
+  }
+
+  @Post('by-role')
+  async findUserByRole(@Body() roleSelector: RoleSelectorDto) {
+    return this.usersService.findUsersByRole(roleSelector);
   }
 
   @Patch(':id')
