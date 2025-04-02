@@ -6,6 +6,9 @@ import { ProductPackage } from './entities/product-package.entity';
 import { Repository } from 'typeorm';
 import { NotificationService } from 'src/notification/notification.service';
 import { User } from 'src/user/entities/user.entity';
+import * as XLSX from "xlsx";
+import { Response } from "express";
+
 
 @Injectable()
 export class ProductPackageService {
@@ -135,5 +138,29 @@ async getmypackages(userId: number): Promise<ProductPackage[]> {
     [userId],
   );
 }
+
+async exportToExcel(productPackage: ProductPackage[], res: Response) {
+  const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(productPackage);
+  const wb: XLSX.WorkBook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "productpackages");
+  const buf = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
+  res.setHeader(
+    "Content-Disposition",
+    'attachment; filename="productpackages.xlsx"',
+  );
+  res.setHeader(
+    "Content-Type",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  );
+  res.send(buf);
+}
+
+async getUserReport(): Promise<ProductPackage[]> {
+  return this.ProductpackageRepository.query(
+    `SELECT * 
+     FROM "product_package"`
+  );
+}
+
 }
 

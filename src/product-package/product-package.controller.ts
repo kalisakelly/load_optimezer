@@ -1,4 +1,19 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, HttpCode, HttpStatus, Req, BadRequestException, UnauthorizedException, InternalServerErrorException } from '@nestjs/common';
+import { Controller,
+    Get,
+    Post,
+    Body,
+    Patch,
+    Param,
+    Delete,
+    UseGuards,
+    HttpCode,
+    HttpStatus,
+    Req,
+    BadRequestException,
+    UnauthorizedException,
+    InternalServerErrorException,
+    Res
+   } from '@nestjs/common';
 import { ProductPackageService } from './product-package.service';
 
 import { CreateProductPackageDto } from './dto/create-product-package.dto';
@@ -8,6 +23,9 @@ import { JwtPayload } from 'src/auth/jwt-payload.interface';
 import { ApiSecurity } from '@nestjs/swagger';
 import { AuthorizationGuard } from 'src/guards/authorization.guard';
 import { Roles } from 'src/auth/decorator/roles.decorator';
+import { Response } from "express";
+import * as XLSX from 'xlsx';
+
 
 @Controller('product-package')
 
@@ -92,6 +110,25 @@ export class ProductPackageController {
     return this.productPackageService.getmypackages(user)
 
 
+  }
+
+  @Get('user-details/excel')
+  async exportUserReportToExcel(@Res() res: Response) {
+    const userDetails = await this.productPackageService.getUserReport();
+    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(userDetails);
+    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'productpackages');
+    const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+
+    res.setHeader(
+      'Content-Disposition',
+      'attachment; filename="productpackages.xlsx"',
+    );
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+    res.send(buf);
   }
 
  
