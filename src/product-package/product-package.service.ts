@@ -8,6 +8,8 @@ import { NotificationService } from 'src/notification/notification.service';
 import { User } from 'src/user/entities/user.entity';
 import * as XLSX from "xlsx";
 import { Response } from "express";
+import { EmailService } from 'src/email/email.service';
+import { VehicleService } from 'src/vehicle/vehicle.service';
 
 
 @Injectable()
@@ -15,7 +17,9 @@ export class ProductPackageService {
 
   constructor(
     @InjectRepository(ProductPackage) private readonly ProductpackageRepository:Repository<ProductPackage>,
-    private readonly notificationService: NotificationService
+    private readonly notificationService: NotificationService,
+    private readonly emailService: EmailService,
+    private readonly vehicleRepository: VehicleService
   ){
 
   }
@@ -108,19 +112,37 @@ export class ProductPackageService {
     return packageToVerify;
   }
 
-async deliverProductPackage(id: string) {
+  async deliverProductPackage(id: string) {
+    // Load the package with the owner relation
+    const packageToDeliver = await this.ProductpackageRepository.findOne({
+      where: { id },
+      relations: ['owner'] // This ensures the owner relation is loaded
+    });
+      
+    if (!packageToDeliver) {
+      throw new Error(`Product Package with id ${id} not found`);
+    }
 
-  const packageToDeliver = await this.ProductpackageRepository.findOneBy({ id });
-
-  if (!packageToDeliver) {
-    throw new Error(`Product Package with id ${id} not found`);
+    if(!packageToDeliver.verified==true) {
+      throw new Error(`Product Package with id ${id} is not verified`);
+    }
+  
+    // Check if owner exists and has an email
+    if (!packageToDeliver.owner || !packageToDeliver.owner.email) {
+      throw new Error('Package owner not found or owner email missing');
+    }
+  
+    packageToDeliver.delivered = true;
+    await this.ProductpackageRepository.save(packageToDeliver);
+  
+    try {
+      await this.emailService.deliverysuccess(packageToDeliver.owner.email , packageToDeliver.id);
+    } catch (emailError) {
+      console.error('Failed to send delivery email:', emailError);
+    }
+  
+    return packageToDeliver;
   }
-
-  packageToDeliver.delivered = true;
-  await this.ProductpackageRepository.save(packageToDeliver);
-
-  return packageToDeliver;
-}
 
 // async findAllByUser(userId: number): Promise<ProductPackage[]> {
 //   // Solution 1: Using find with where clause

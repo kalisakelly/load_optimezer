@@ -63,5 +63,14 @@ export class UsersController {
     return this.usersService.updaterole(userid, updateUserDto);
   }
 
+  @Get('count/users')
+  async getUserCount() {
+
+    const count = await this.usersService.getCountUsers()
+
+    return { count }
+  
+  }
+
   
 }

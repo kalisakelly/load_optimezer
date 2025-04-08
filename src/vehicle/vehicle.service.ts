@@ -13,16 +13,10 @@ export class VehicleService {
   
       @InjectRepository(Vehicle) private readonly VehicleRepository: Repository<Vehicle>,
     ) { }
-  async create(
-    createVehicleDto: CreateVehicleDto,
-    driver:User):Promise<Vehicle> {
-    const createVehicle = await this.VehicleRepository.create({
-     ...createVehicleDto,
-     driver,
-    })
-    
-    return this.VehicleRepository.save(createVehicle);
-  }
+    async create(vehicleData: Partial<Vehicle>): Promise<Vehicle> {
+      const vehicle = this.VehicleRepository.create(vehicleData);
+      return await this.VehicleRepository.save(vehicle);
+    }
 
   findAll() {
     return this.VehicleRepository.find({
@@ -35,12 +29,12 @@ export class VehicleService {
     return this.VehicleRepository.findOneBy({id})
   }
 
-  // async update(id: number, updateVehicleDto: UpdateVehicleDto):Promise<Vehicle> {
+  async update(id: number, updateVehicleDto: Partial<Vehicle>):Promise<Vehicle> {
     
-  //   await this.VehicleRepository.update(id, updateVehicleDto);
+    await this.VehicleRepository.update(id, updateVehicleDto);
 
-  //   return this.VehicleRepository.findOneBy({ id });
-  // }
+    return this.VehicleRepository.findOneBy({ id });
+  }
 
   remove(id: number) {
     return this.VehicleRepository.delete(id);
@@ -59,4 +53,41 @@ export class VehicleService {
     
     return vehicle.packagings;
   }
+
+  async allowVehicle(id: number) {
+    const packageToVerify = await this.VehicleRepository.findOneBy({ id });
+
+    if (!packageToVerify) {
+      throw new Error(`Vehicle with id ${id} not found`);
+    }
+
+    packageToVerify.isinmotion = true;
+    await this.VehicleRepository.save(packageToVerify);
+
+    return packageToVerify;
+  }
+
+  async reloadVehicle(id: number) {
+    const packageToVerify = await this.VehicleRepository.findOneBy({ id });
+
+    if (!packageToVerify) {
+      throw new Error(`Vehicle with id ${id} not found`);
+    }
+
+    packageToVerify.space_available = packageToVerify.capacity;
+    packageToVerify.isinmotion = false
+
+    await this.VehicleRepository.save(packageToVerify);
+
+    return packageToVerify;
+  }
+
+  async getCountVehicle(){
+
+    const result = this.VehicleRepository.count()
+
+    return result
+  }
+
+  
 }

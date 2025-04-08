@@ -8,10 +8,14 @@ import { Stock } from 'src/stock/entities/stock.entity';
 import { Packaging } from 'src/packaging/entities/packaging.entity';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/user/user.service';
+import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Vehicle,User,Stock,Packaging])],
+  imports: [
+    TypeOrmModule.forFeature([Vehicle,User,Stock,Packaging]),
+    CloudinaryModule
+  ],
   controllers: [VehicleController],
-  providers: [VehicleService,JwtService,UsersService],
+  providers: [VehicleService,JwtService,UsersService,],
 })
 export class VehicleModule {}

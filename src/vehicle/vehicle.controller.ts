@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, NotFoundException, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, NotFoundException, Req, UseInterceptors, UploadedFile, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBody, ApiResponse, ApiParam, ApiSecurity } from '@nestjs/swagger';
 import { VehicleService } from './vehicle.service';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
@@ -9,34 +9,51 @@ import { AuthorizationGuard } from 'src/guards/authorization.guard';
 import { User } from 'src/user/entities/user.entity';
 import { UsersService } from 'src/user/user.service';
 import { Packaging } from 'src/packaging/entities/packaging.entity';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Vehicle } from './entities/vehicle.entity';
+
+
 
 @ApiTags('vehicles') // Group all vehicle-related endpoints under "vehicles" in Swagger
 @Controller('vehicle')
 export class VehicleController {
   constructor(
     private readonly vehicleService: VehicleService,
+    private readonly cloudinaryService: CloudinaryService,
     private readonly userService: UsersService) {}
 
-    @ApiOperation({ summary: 'Create a new vehicle and assign it to a driver' })
-    @ApiBody({ type: CreateVehicleDto }) // Define the request body schema
-    @ApiResponse({ status: 201, description: 'Vehicle created successfully.' })
-    // @UseGuards(AuthenticationGuard, AuthorizationGuard)
-    // @Roles('logistics', 'admin') // Ensure only admins or logistics can create vehicles
-    // @ApiSecurity('jwt')
     @Post()
-    async create(@Body() createVehicleDto: CreateVehicleDto) {
-      // Find the driver (user) by the provided driverId
-      const driver = await this.userService.findOne(createVehicleDto.driver);
-      
-      // If no driver is found, throw a 404 error
-      if (!driver) {
-        throw new NotFoundException(`Driver with ID ${createVehicleDto.driver} not found`);
-      }
-  
-      // Pass the driver (user) to the service to create the vehicle
-      return this.vehicleService.create(createVehicleDto, driver);
-    }
+    @UseInterceptors(FileInterceptor('image'))
+    async create(
+      @UploadedFile() image: Express.Multer.File,
+      @Body('name') name: string,
+      @Body('description') description: string,
+      @Body('capacity') capacity: number,
+      @Body('type') type: string,
+      @Body('space_available') space_available:number,
+      @Body('driver') driver: User,
+      @Body('isinmotion') isinmotion: boolean,
+    ) {
 
+      const uploadResult = await this.cloudinaryService.uploadImage(image);
+
+      const newNutrition = {
+        name,
+        description,
+        image: uploadResult.secure_url,
+        capacity,
+        space_available :capacity ,
+        type,
+        driver,
+        isinmotion,
+      };
+
+      await this.vehicleService.create(newNutrition);
+
+
+      return { message: 'New Vehicle saved successfully!' };
+    }
   @ApiOperation({ summary: 'Get all vehicles' })
   @ApiResponse({ status: 200, description: 'List of all vehicles.' })
   @Get()
@@ -52,14 +69,14 @@ export class VehicleController {
     return this.vehicleService.findOne(+id);
   }
 
-  // @ApiOperation({ summary: 'Update an existing vehicle' })
-  // @ApiParam({ name: 'id', description: 'ID of the vehicle to update', type: 'number' })
-  // @ApiBody({ type: UpdateVehicleDto }) // Define the request body schema
-  // @ApiResponse({ status: 200, description: 'Vehicle updated successfully.' })
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateVehicleDto: UpdateVehicleDto) {
-  //   return this.vehicleService.update(+id, updateVehicleDto);
-  // }
+  @ApiOperation({ summary: 'Update an existing vehicle' })
+  @ApiParam({ name: 'id', description: 'ID of the vehicle to update', type: 'number' })
+  @ApiBody({ type: UpdateVehicleDto }) // Define the request body schema
+  @ApiResponse({ status: 200, description: 'Vehicle updated successfully.' })
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateVehicleDto: Partial<Vehicle>) {
+    return this.vehicleService.update(+id, updateVehicleDto);
+  }
 
   @ApiOperation({ summary: 'Delete a vehicle by ID' })
   @ApiParam({ name: 'id', description: 'ID of the vehicle to delete', type: 'number' })
@@ -80,4 +97,33 @@ export class VehicleController {
     const driverId = req.user.id;
     return this.vehicleService.getPackagingsByDriver(driverId);
   }
+
+  @Patch(':id/verify')
+    @HttpCode(HttpStatus.OK)
+    async Vehicleinmotion(
+      @Param('id') id: number,
+    ) {
+      
+  
+      return await this.vehicleService.allowVehicle(id);
+    }
+
+  @Patch(':id/reloadVehicle')
+  @HttpCode(HttpStatus.OK)
+  async reloadVehicle(
+      @Param('id') id: number,
+    ) {
+      
+  
+      return await this.vehicleService.reloadVehicle(id);
+    }
+
+    @Get('count/vehicles')
+    async getUserCount() {
+  
+      const count = await this.vehicleService.getCountVehicle()
+  
+      return { count }
+    
+    }
 }

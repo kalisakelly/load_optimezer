@@ -82,4 +82,12 @@ export class UsersService {
     };
   }
 
+
+  async getCountUsers() {
+    
+    const result = await this.userrepository.count();
+
+    return result
+  }
+
 }

@@ -22,6 +22,9 @@ import { ProductPackageModule } from './product-package/product-package.module';
 import { ProductPackage } from './product-package/entities/product-package.entity';
 import { PackagingRequestModule } from './packaging-request/packaging-request.module';
 import { PackagingRequest } from './packaging-request/entities/packaging-request.entity';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { MulterModule } from '@nestjs/platform-express';
+
 
 @Module({
   imports: [
@@ -45,6 +48,7 @@ import { PackagingRequest } from './packaging-request/entities/packaging-request
       synchronize: true,
     }),
     UserModule,
+    MulterModule.register({dest:'./uploads'}),
     AuthModule,
     StockModule,
     VehicleModule,
@@ -55,6 +59,7 @@ import { PackagingRequest } from './packaging-request/entities/packaging-request
     EmailModule,
     ProductPackageModule,
     PackagingRequestModule,
+    CloudinaryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

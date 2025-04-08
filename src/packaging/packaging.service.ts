@@ -16,7 +16,7 @@ export class PackagingService {
   async loadItemToVehicle(
     vehicleId: number,
     itemId: string,
-    quantity: number
+    // quantity: number
   ): Promise<any> {
     const vehicle = await this.vehicleRepository.findOne({
       where: { id: vehicleId },
@@ -36,25 +36,33 @@ export class PackagingService {
     }
   
     // Check available quantity
-    if (productPackage.quantity < quantity) {
-      throw new Error("Not enough quantity available");
-    }
+    // if (productPackage.quantity < quantity) {
+    //   throw new Error("Not enough quantity available");
+    // }
   
     // Create new Packaging entry
     const packaging = new Packaging();
     packaging.vehicle = vehicle;
     packaging.item = productPackage; 
-    packaging.quantity = quantity;
+    packaging.quantity = productPackage.quantity;
+
+    if (vehicle.space_available >= productPackage.quantity){
+      vehicle.space_available -= productPackage.quantity;
+    } else {
+      throw new Error("Vehicle capacity exceeded");
+    }
+
+    await this.vehicleRepository.save(vehicle);
     
     await this.packagingRepository.save(packaging);
   
-    // Update ProductPackage's quantity and completed status
-    productPackage.quantity -= quantity;
+    productPackage.quantity -= productPackage.quantity;
     if (productPackage.quantity === 0) {
       productPackage.completed = true;
     }
   
     await this.productPackageRepository.save(productPackage);
+
   
     return { message: "Item loaded successfully" };
   }
@@ -81,5 +89,18 @@ export class PackagingService {
     }
 
     return vehicle;
+  }
+
+  async CountPackaging(){
+
+    const result = this.packagingRepository.count()
+
+    return result
+  }
+
+  async findall() {
+    return this.packagingRepository.find({
+      relations: ['vehicle', 'item'], // Using 'item' instead of 'productPackage'
+    });
   }
 }

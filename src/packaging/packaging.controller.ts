@@ -26,7 +26,7 @@ export class PackagingController {
     return this.packagingService.loadItemToVehicle(
       vehicleId, 
       loadItemDto.itemId, 
-      loadItemDto.quantity, 
+      // loadItemDto.quantity, 
     );
   }
 // @ApiOperation({ summary: "Get all vehicles with their items" })
@@ -44,4 +44,20 @@ export class PackagingController {
 //     })),
 //   }));
 // }
+
+@Get('count/packagings')
+  async getPackingCount() {
+
+    const count = await this.packagingService.CountPackaging();
+
+    return { count }
+  
+  }
+
+
+@Get('/findall')
+async getall(){
+  
+  return this.packagingService.findall()
+}
 }

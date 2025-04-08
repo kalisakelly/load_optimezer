@@ -31,13 +31,15 @@ export class Vehicle {
   capacity: number;
 
   @Column({nullable:true})
+  space_available: number;
+
+  @Column({nullable:true})
   type:string;
 
   @OneToOne(() => User, (user) => user.drivers)
   @JoinColumn()
   driver: User;
 
-  // Fixed ManyToMany relationship with Item
   @ManyToMany(() => Item)
   @JoinTable()
   items: Item[];
@@ -45,12 +47,17 @@ export class Vehicle {
   @OneToMany(() => Packaging, (packaging) => packaging.vehicle)
   packagings: Packaging[];
 
-  // Add inverse side for PackagingRequest relationship
+  @Column({nullable: true})
+  isinmotion: boolean;
+
+  @Column({nullable:true})
+  image:string;
+
   @OneToOne(
     () => PackagingRequest, 
-    (packagingRequest) => packagingRequest.vehicle // Assuming this exists
+    (packagingRequest) => packagingRequest.vehicle 
   )
-  packagingRequest: PackagingRequest; // Add this field
+  packagingRequest: PackagingRequest; 
 
   @CreateDateColumn({ name: 'created_at' })
   created_at: Date;
