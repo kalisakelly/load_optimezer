@@ -36,7 +36,7 @@ export class Vehicle {
   @Column({nullable:true})
   type:string;
 
-  @OneToOne(() => User, (user) => user.drivers)
+  @OneToOne(() => User, (user) => user.drivers )
   @JoinColumn()
   driver: User;
 

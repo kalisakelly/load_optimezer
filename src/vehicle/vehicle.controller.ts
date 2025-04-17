@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, NotFoundException, Req, UseInterceptors, UploadedFile, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, NotFoundException, Req, UseInterceptors, UploadedFile, HttpCode, HttpStatus, BadRequestException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBody, ApiResponse, ApiParam, ApiSecurity } from '@nestjs/swagger';
 import { VehicleService } from './vehicle.service';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
@@ -23,38 +23,51 @@ export class VehicleController {
     private readonly cloudinaryService: CloudinaryService,
     private readonly userService: UsersService) {}
 
-    @Post()
-    @UseInterceptors(FileInterceptor('image'))
-    async create(
-      @UploadedFile() image: Express.Multer.File,
-      @Body('name') name: string,
-      @Body('description') description: string,
-      @Body('capacity') capacity: number,
-      @Body('type') type: string,
-      @Body('space_available') space_available:number,
-      @Body('driver') driver: User,
-      @Body('isinmotion') isinmotion: boolean,
-    ) {
+@Post()
+@UseInterceptors(FileInterceptor('image'))
+async create(
+  @UploadedFile() image: Express.Multer.File,
+  @Body('name') name: string,
+  @Body('description') description: string,
+  @Body('capacity') capacity: number,
+  @Body('type') type: string,
+  @Body('space_available') space_available: number,
+  @Body('driver') driverId: string, // Receive driver ID as a string
+  @Body('isinmotion') isinmotion: boolean,
+) {
+  // Validate driver ID
+  const driverIdNumber = parseInt(driverId, 10);
+  if (isNaN(driverIdNumber)) {
+    throw new BadRequestException('Invalid driver ID');
+  }
 
-      const uploadResult = await this.cloudinaryService.uploadImage(image);
+  // Fetch the driver object using the provided driver ID
+  const driver = await this.userService.findOne(driverIdNumber);
 
-      const newNutrition = {
-        name,
-        description,
-        image: uploadResult.secure_url,
-        capacity,
-        space_available :capacity ,
-        type,
-        driver,
-        isinmotion,
-      };
+  // Upload the image to Cloudinary
+  let imageUrl = null;
+  if (image) {
+    const uploadResult = await this.cloudinaryService.uploadImage(image);
+    imageUrl = uploadResult.secure_url;
+  }
 
-      await this.vehicleService.create(newNutrition);
+  // Create the new vehicle object
+  const newVehicle = {
+    name,
+    description,
+    image: imageUrl,
+    capacity,
+    space_available: space_available || capacity, // Use provided value or default to capacity
+    type,
+    driver,
+    isinmotion: isinmotion !== undefined ? isinmotion : false, // Default to false if not provided
+  };
 
+  // Save the vehicle
+  await this.vehicleService.create(newVehicle);
 
-      return { message: 'New Vehicle saved successfully!' };
-    }
-  @ApiOperation({ summary: 'Get all vehicles' })
+  return { message: 'New Vehicle saved successfully!' };
+}  @ApiOperation({ summary: 'Get all vehicles' })
   @ApiResponse({ status: 200, description: 'List of all vehicles.' })
   @Get()
   findAll() {

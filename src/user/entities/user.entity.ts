@@ -17,10 +17,10 @@ export class User {
   @Column({ default: true })
   isActive: boolean;
 
-  @Column()
+  @Column({default:"12345678"})
   password: string;
 
-  @Column({ default: 'user' }) 
+  @Column({ default: 'client' }) 
   role: string;
 
   @OneToOne(() => Vehicle, (vehicle) => vehicle.driver)

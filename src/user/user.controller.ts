@@ -27,8 +27,8 @@ export class UsersController {
     return user;
   }
 
-  // @UseGuards(AuthenticationGuard,AuthorizationGuard)
-  // @Roles('admin')
+  @UseGuards(AuthenticationGuard,AuthorizationGuard)
+  @Roles('admin')
   @ApiSecurity('jwt')
   @Get()
   findAll() {
