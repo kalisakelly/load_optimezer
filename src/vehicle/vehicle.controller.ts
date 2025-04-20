@@ -25,6 +25,7 @@ export class VehicleController {
 
 @Post()
 @UseInterceptors(FileInterceptor('image'))
+// @UseGuards(AuthenticationGuard)
 async create(
   @UploadedFile() image: Express.Multer.File,
   @Body('name') name: string,
@@ -67,7 +68,10 @@ async create(
   await this.vehicleService.create(newVehicle);
 
   return { message: 'New Vehicle saved successfully!' };
-}  @ApiOperation({ summary: 'Get all vehicles' })
+
+} 
+
+@ApiOperation({ summary: 'Get all vehicles' })
   @ApiResponse({ status: 200, description: 'List of all vehicles.' })
   @Get()
   findAll() {

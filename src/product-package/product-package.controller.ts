@@ -131,5 +131,14 @@ export class ProductPackageController {
     res.send(buf);
   }
 
+  @Get('count/products')
+    async getUserCount() {
+  
+      const count = await this.productPackageService.getCountVehicle()
+  
+      return { count }
+    
+    }
+
  
 }

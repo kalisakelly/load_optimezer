@@ -184,5 +184,13 @@ async getUserReport(): Promise<ProductPackage[]> {
   );
 }
 
+async getCountVehicle(){
+
+  const result = this.ProductpackageRepository.count()
+
+  return result
+}
+
+
 }
 
